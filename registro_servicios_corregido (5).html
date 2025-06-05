@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<title>Registro de Servicios</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --color-primario: #3498db;
+    --color-secundario: #6a82fb;
+    --color-error: #e74c3c;
+    --color-exito: #27ae60;
+    --color-fondo-claro: #f0f4f8;
+    --color-fondo-oscuro: #121212;
+    --color-texto-claro: #2c3e50;
+    --color-texto-oscuro: #f1f1f1;
+    --transition: all 0.3s ease;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0; padding: 20px;
+    background: var(--color-fondo-claro);
+    color: var(--color-texto-claro);
+    max-width: 960px; margin-inline: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  body.dark {
+    background: var(--color-fondo-oscuro);
+    color: var(--color-texto-oscuro);
+  }
+  h1 {
+    font-size: 2rem; margin: 30px 0 15px;
+    text-align: center; font-weight: 700;
+    color: inherit;
+  }
+  label {
+    display: block; margin-top: 20px;
+    font-weight: 600;
+    color: inherit;
+  }
+  input, select {
+    padding: 12px 14px; width: 100%; box-sizing: border-box;
+    border: 1.5px solid #a0b9cc; border-radius: 10px; margin-top: 6px;
+    font-size: 1rem;
+    transition: var(--transition);
+    background-color: #fff;
+    color: #222;
+  }
+  body.dark input, body.dark select {
+    background-color: #222;
+    color: #f1f1f1;
+    border-color: #555;
+  }
+  input:focus, select:focus {
+    border-color: var(--color-primario); outline: none; box-shadow: 0 0 8px var(--color-primario);
+    background-color: #fff;
+    color: #222;
+  }
+  body.dark input:focus, body.dark select:focus {
+    background-color: #333;
+    color: #f1f1f1;
+  }
+  button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    user-select: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    color: white;
+    transition: var(--transition);
+    min-width: 140px;
+    background: linear-gradient(135deg, var(--color-secundario) 0%, #fc5c7d 100%);
+  }
+  button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #fc5c7d 0%, var(--color-secundario) 100%);
+    box-shadow: 0 6px 14px rgba(252, 92, 125, 0.7);
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .botonera {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+  }
+  table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin-top: 15px; font-size: 1rem; border-radius: 14px;
+    overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #fff;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  body.dark table {
+    background: #222;
+    color: #f1f1f1;
+  }
+  th, td {
+    padding: 14px 18px; text-align: center; border-bottom: 1px solid #ecf0f1;
+  }
+  body.dark th, body.dark td {
+    border-color: #444;
+  }
+  th {
+    background-color: var(--color-primario);
+    color: #fefefe;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    cursor: pointer;
+    user-select: none;
+  }
+  tbody tr:nth-child(even) {
+    background-color: #f9fbfc;
+  }
+  body.dark tbody tr:nth-child(even) {
+    background-color: #2a2a2a;
+  }
+  tbody tr[aria-selected="true"] {
+    background-color: #d0e7ff;
+  }
+  body.dark tbody tr[aria-selected="true"] {
+    background-color: #3a3a5c;
+  }
+  th.sort-asc::after {
+    content: " ▲";
+  }
+  th.sort-desc::after {
+    content: " ▼";
+  }
+  #paginacion {
+    margin-top: 10px;
+    text-align: center;
+    user-select: none;
+  }
+  #paginacion button {
+    margin: 0 4px;
+    padding: 6px 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    min-width: 40px;
+  }
+  #paginacion button.active {
+    background: var(--color-primario);
+    box-shadow: 0 4px 10px rgba(52,152,219,0.7);
+  }
+  .input-error {
+    border-color: var(--color-error) !important;
+  }
+  .mensaje-error {
+    color: var(--color-error);
+    font-size: 0.875rem;
+    margin-top: 4px;
+    opacity: 0;
+    max-height: 0;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+  }
+  .mensaje-error.show {
+    opacity: 1;
+    max-height: 60px;
+  }
+  input[type="checkbox"] {
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 2.5px solid var(--color-primario);
+    background-color: var(--color-fondo-claro);
+    cursor: pointer;
+    vertical-align: middle;
+    position: relative;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    margin-right: 10px;
+  }
+  body.dark input[type="checkbox"] {
+    background-color: var(--color-fondo-oscuro);
+    border-color: #5a7db1;
+  }
+  input[type="checkbox"]:checked {
+    background-color: var(--color-primario);
+    border-color: #2c3e50;
+  }
+  input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 3.5px;
+    left: 6px;
+    width: 6px;
+    height: 11px;
+    border: solid #fefefe;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+  }
+  #toast {
+    position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-primario);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 18px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 9999;
+  }
+  #toast.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #toast svg {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+  .tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+  }
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: var(--color-primario);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 10000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.875rem;
+  }
+  .tooltip:hover .tooltiptext, .tooltip:focus-within .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+  #toggle-darkmode {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--color-primario);
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 10px 15px;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: background 0.3s ease;
+    z-index: 10001;
+  }
+  #toggle-darkmode:hover {
+    background: #2c80cc;
+  }
+</style>
+</head>
+<body>
+  <button id="toggle-darkmode" aria-pressed="false" aria-label="Alternar modo oscuro">Modo Oscuro</button>
+
+  <h1>Registro de Servicios</h1>
+
+  <form id="formulario" aria-describedby="form-error" novalidate>
+
+    <label for="modo-manual-especialista" style="font-weight:600; margin-top:25px; cursor:pointer; user-select:none;">
+      <input type="checkbox" id="modo-manual-especialista" /> Activar modo manual especialista
+      <span class="tooltip" tabindex="0" aria-label="Modo manual para ingresar especialista personalizado.">
+        &#9432;
+        <span class="tooltiptext">Permite ingresar un especialista personalizado en lugar de elegir uno de la lista.</span>
+      </span>
+    </label>
+
+    <div id="modo-normal-especialista">
+      <label for="especialista">Especialista:</label>
+      <select id="especialista" aria-required="true" aria-invalid="false">
+        <option value="">Selecciona especialista</option>
+        <option>Lic Juan</option>
+        <option>Lic Eduardo</option>
+        <option>Lic Diego (psicólogo)</option>
+        <option>Lic Diego</option>
+        <option>Lic Cynthia</option>
+        <option>Lic Dulce</option>
+        <option>Lic Liliana</option>
+        <option>Lic Maria Fernanda</option>
+      </select>
+      <div id="error-especialista" class="mensaje-error" role="alert" aria-live="assertive"></div>
+    </div>
+
+    <div id="modo-manual-especialista-campos" style="display:none;">
+      <label for="manual-especialista">Especialista (manual):</label>
+      <input type="text" id="manual-especialista" aria-required="true" aria-invalid="false" placeholder="Ejemplo: Lic Diego" />
+      <div id="error-manual-especialista" class="mensaje-error" role="alert" aria-live="assertive"></div>
+    </div>
+
+    <label for="modo-manual-costos" style="font-weight:600; margin-top:25px; cursor:pointer; user-select:none;">
+      <input type="checkbox" id="modo-manual-costos" /> Activar modo manual costos y comisión
+      <span class="tooltip" tabindex="0" aria-label="Modo manual para ingresar datos personalizados del paciente y servicio.">
+        &#9432;
+        <span class="tooltiptext">Permite ingresar nombre, servicio y costos personalizados en lugar de elegirlos de la lista.</span>
+      </span>
+    </label>
+
+    <div id="modo-normal-costos">
+      <label for="paciente">Nombre del paciente:</label>
+      <input type="text" id="paciente" aria-required="true" aria-invalid="false" />
+      <div id="error-paciente" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+      <label for="servicio">Servicio:</label>
+      <select id="servicio" aria-required="true" aria-invalid="false">
+        <option value="">Selecciona servicio</option>
+        <option value="Psicología Infantil">Psicología Infantil</option>
+        <option value="Psicología Adulto">Psicología Adulto</option>
+        <option value="Medico Especialista en rehabilitación">Medico Especialista en rehabilitación</option>
+        <option value="Consulta Medica">Consulta Medica</option>
+        <option value="Audiología">Audiología</option>
+        <option value="Estimulación temprana">Estimulación temprana</option>
+        <option value="Nutrición">Nutrición</option>
+        <option value="Terapia Física">Terapia Física</option>
+        <option value="Terapia Ocupacional">Terapia Ocupacional</option>
+        <option value="Terapia de Lenguaje">Terapia de Lenguaje</option>
+      </select>
+      <div id="error-servicio" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+      <label for="costo">Costo del servicio:</label>
+      <select id="costo" aria-required="true" aria-invalid="false"></select>
+      <div id="error-costo" class="mensaje-error" role="alert" aria-live="assertive"></div>
+    </div>
+
+    <div id="modo-manual-costos-campos" style="display:none;">
+      <label for="manual-paciente">Nombre del paciente (manual):</label>
+      <input type="text" id="manual-paciente" aria-required="true" aria-invalid="false" />
+      <div id="error-manual-paciente" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+      <label for="manual-servicio">Servicio (manual):</label>
+      <input type="text" id="manual-servicio" aria-required="true" aria-invalid="false" placeholder="Ejemplo: Psicología Especial" />
+      <div id="error-manual-servicio" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+      <label for="manual-costo">Costo del servicio (manual):</label>
+      <input type="number" id="manual-costo" aria-required="true" aria-invalid="false" min="0" step="0.01" />
+      <div id="error-manual-costo" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+      <label for="manual-comision">Comisión especialista (manual):</label>
+      <input type="number" id="manual-comision" aria-required="true" aria-invalid="false" min="0" step="0.01" />
+      <div id="error-manual-comision" class="mensaje-error" role="alert" aria-live="assertive"></div>
+    </div>
+
+    <label for="dia">Día:</label>
+    <input type="date" id="dia" aria-required="true" aria-invalid="false" />
+    <div id="error-dia" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+    <label for="hora-inicio">Hora de inicio:</label>
+    <input type="time" id="hora-inicio" aria-required="true" aria-invalid="false" />
+    <div id="error-hora-inicio" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+    <label for="hora-fin">Hora de fin:</label>
+    <input type="time" id="hora-fin" aria-required="true" aria-invalid="false" />
+    <div id="error-hora-fin" class="mensaje-error" role="alert" aria-live="assertive"></div>
+
+    <div class="botonera">
+      <button type="button" class="guardar" id="btn-guardar" aria-live="polite" aria-disabled="false" disabled>Guardar Registro</button>
+      <button type="button" class="borrar" id="btn-borrar" aria-live="polite">🗑️ Borrar todos los registros</button>
+      <button type="button" class="exportarExcel" aria-live="polite">Exportar Excel</button>
+    </div>
+    <div id="form-error" role="alert" aria-live="assertive" style="margin-top:10px; color: var(--color-error); font-weight:bold;"></div>
+  </form>
+
+  <h2>Registros</h2>
+  <table id="tabla" aria-label="Tabla de registros">
+    <thead>
+      <tr>
+        <th tabindex="0" role="button" aria-sort="none" data-col="0">Paciente</th>
+        <th tabindex="0" role="button" aria-sort="none" data-col="1">Especialista</th>
+        <th tabindex="0" role="button" aria-sort="none" data-col="2">Servicio</th>
+        <th tabindex="0" role="button" aria-sort="none" data-col="3">Costo</th>
+        <th tabindex="0" role="button" aria-sort="none" data-col="4">Día</th>
+        <th tabindex="0" role="button" aria-sort="none" data-col="5">Hora</th>
+        <th tabindex="0" role="button" aria-sort="none" data-col="6">Pago Especialista</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="paginacion" aria-label="Paginación tabla" role="navigation" aria-live="polite" style="margin-top:10px;"></div>
+
+  <h2>Ganancias por Especialista</h2>
+  <table id="tabla-ganancias" aria-label="Ganancias por especialista">
+    <thead>
+      <tr>
+        <th>Especialista</th>
+        <th>Total a Pagar</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Ganancia para la Oficina</h2>
+  <p id="ganancia-oficina" aria-live="polite">$0.00</p>
+
+  <h2>Ganancias por Servicio</h2>
+  <table id="tabla-servicios" aria-label="Ganancias por servicio">
+    <thead>
+      <tr>
+        <th>Servicio</th>
+        <th>Total Generado</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="toast" role="alert" aria-live="assertive" aria-atomic="true" aria-relevant="additions"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    function quitarAcentos(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function normalizarNombre(nombre) {
+    const serviciosValidos = [
+  "Estimulación Temprana",
+  "Psicología Infantil",
+  "Psicología Adulto",
+  "Medico Especialista en Rehabilitación",
+  "Consulta Medica",
+  "Audiología",
+  "Nutrición",
+  "Terapia Física",
+  "Terapia Ocupacional",
+  "Terapia de Lenguaje"
+];
+
+function corregirServicio(nombre) {
+  const limpio = normalizarNombre(nombre);
+  for (const valido of serviciosValidos) {
+    if (limpio.includes(valido.split(" ")[0])) {
+      return valido;
+    }
+  }
+  return limpio;
+}
+
+  return quitarAcentos(
+    nombre.trim()
+      .replace(/\s+/g, ' ')               // elimina espacios dobles
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // corrige errores como "EstimulaciónN"
+      .toLowerCase()
+  ).replace(/\b\w/g, l => l.toUpperCase());
+}
+
+    const registros = JSON.parse(localStorage.getItem("registros") || "[]");
+    const papelera = [];
+    const filasPorPagina = 8;
+    let paginaActual = 1;
+    let ordenActual = {columna: null, asc: true};
+
+    const tablaBody = document.querySelector("#tabla tbody");
+    const paginacionCont = document.getElementById("paginacion");
+    const form = document.getElementById("formulario");
+
+    const inputs = {
+      especialista: document.getElementById("especialista"),
+      manualEspecialista: document.getElementById("manual-especialista"),
+      paciente: document.getElementById("paciente"),
+      manualPaciente: document.getElementById("manual-paciente"),
+      servicio: document.getElementById("servicio"),
+      manualServicio: document.getElementById("manual-servicio"),
+      costo: document.getElementById("costo"),
+      manualCosto: document.getElementById("manual-costo"),
+      manualComision: document.getElementById("manual-comision"),
+      dia: document.getElementById("dia"),
+      horaInicio: document.getElementById("hora-inicio"),
+      horaFin: document.getElementById("hora-fin")
+    };
+
+    const modoManualEspCheck = document.getElementById("modo-manual-especialista");
+    const modoManualCostosCheck = document.getElementById("modo-manual-costos");
+    const modoNormalEspDiv = document.getElementById("modo-normal-especialista");
+    const modoManualEspDiv = document.getElementById("modo-manual-especialista-campos");
+    const modoNormalCostosDiv = document.getElementById("modo-normal-costos");
+    const modoManualCostosDiv = document.getElementById("modo-manual-costos-campos");
+
+    const errores = {
+      especialista: document.getElementById("error-especialista"),
+      manualEspecialista: document.getElementById("error-manual-especialista"),
+      paciente: document.getElementById("error-paciente"),
+      manualPaciente: document.getElementById("error-manual-paciente"),
+      servicio: document.getElementById("error-servicio"),
+      manualServicio: document.getElementById("error-manual-servicio"),
+      costo: document.getElementById("error-costo"),
+      manualCosto: document.getElementById("error-manual-costo"),
+      manualComision: document.getElementById("error-manual-comision"),
+      dia: document.getElementById("error-dia"),
+      horaInicio: document.getElementById("error-hora-inicio"),
+      horaFin: document.getElementById("error-hora-fin"),
+      formError: document.getElementById("form-error")
+    };
+
+    const btnGuardar = document.getElementById("btn-guardar");
+    const btnBorrar = document.getElementById("btn-borrar");
+    const btnExportar = document.querySelector(".exportarExcel");
+
+    const preciosServicios = {
+      "Psicología Infantil": [150, 200],
+      "Psicología Adulto": [250],
+      "Medico Especialista en rehabilitación": [350],
+      "Consulta Medica": [60],
+      "Audiología": [50],
+      "Estimulación temprana": [120],
+      "Nutrición": [200],
+      "Terapia Física": [200],
+      "Terapia Ocupacional": [120],
+      "Terapia de Lenguaje": [100, 120],
+    };
+
+    let intentoEnvio = false;
+    const camposTocados = new Set();
+
+    function toggleModoEspecialista() {
+      if (modoManualEspCheck.checked) {
+        modoNormalEspDiv.style.display = "none";
+        modoManualEspDiv.style.display = "block";
+        errores.especialista.textContent = "";
+      } else {
+        modoNormalEspDiv.style.display = "block";
+        modoManualEspDiv.style.display = "none";
+        errores.manualEspecialista.textContent = "";
+      }
+    }
+
+    function toggleModoCostos() {
+      if (modoManualCostosCheck.checked) {
+        modoNormalCostosDiv.style.display = "none";
+        modoManualCostosDiv.style.display = "block";
+        errores.paciente.textContent = "";
+        errores.servicio.textContent = "";
+        errores.costo.textContent = "";
+      } else {
+        modoNormalCostosDiv.style.display = "block";
+        modoManualCostosDiv.style.display = "none";
+        errores.manualPaciente.textContent = "";
+        errores.manualServicio.textContent = "";
+        errores.manualCosto.textContent = "";
+        errores.manualComision.textContent = "";
+      }
+    }
+
+    modoManualEspCheck.addEventListener("change", toggleModoEspecialista);
+    modoManualCostosCheck.addEventListener("change", toggleModoCostos);
+
+    function actualizarOpcionesCosto() {
+      const servicio = inputs.servicio.value;
+      inputs.costo.innerHTML = "";
+      if (!servicio || !preciosServicios[servicio] || preciosServicios[servicio].length === 0) {
+        const opt = document.createElement("option");
+        opt.textContent = "Selecciona un servicio primero";
+        opt.disabled = true;
+        opt.selected = true;
+        inputs.costo.appendChild(opt);
+        return;
+      }
+      preciosServicios[servicio].forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        inputs.costo.appendChild(opt);
+      });
+    }
+
+    inputs.servicio.addEventListener("input", actualizarOpcionesCosto);
+
+    function validarCampo(input, errorElem, validadorFn, mensaje) {
+      const valor = input.value;
+      const mostrarError = intentoEnvio || camposTocados.has(input.id);
+      if (!validadorFn(valor) && mostrarError) {
+        input.classList.add("input-error");
+        errorElem.textContent = mensaje;
+        errorElem.classList.add("show");
+        input.setAttribute("aria-invalid", "true");
+        return false;
+      } else {
+        input.classList.remove("input-error");
+        errorElem.textContent = "";
+        errorElem.classList.remove("show");
+        input.setAttribute("aria-invalid", "false");
+        return true;
+      }
+    }
+
+    function validarCampos() {
+      let valido = true;
+      if (modoManualEspCheck.checked) {
+        valido = validarCampo(inputs.manualEspecialista, errores.manualEspecialista, v => v.trim() !== "", "Especialista (manual) requerido.") && valido;
+      } else {
+        valido = validarCampo(inputs.especialista, errores.especialista, v => v.trim() !== "", "Selecciona especialista.") && valido;
+      }
+      if (modoManualCostosCheck.checked) {
+        valido = validarCampo(inputs.manualPaciente, errores.manualPaciente, v => v.trim() !== "", "Paciente (manual) requerido.") && valido;
+        valido = validarCampo(inputs.manualServicio, errores.manualServicio, v => v.trim() !== "", "Servicio (manual) requerido.") && valido;
+        valido = validarCampo(inputs.manualCosto, errores.manualCosto, v => !isNaN(v) && parseFloat(v) > 0, "Costo (manual) válido requerido.") && valido;
+        valido = validarCampo(inputs.manualComision, errores.manualComision, v => !isNaN(v) && parseFloat(v) >= 0, "Comisión (manual) válida requerida.") && valido;
+        if (parseFloat(inputs.manualComision.value) > parseFloat(inputs.manualCosto.value)) {
+          errores.manualComision.textContent = "Comisión no puede ser mayor que el costo.";
+          errores.manualComision.classList.add("show");
+          inputs.manualComision.classList.add("input-error");
+          valido = false;
+        }
+      } else {
+        valido = validarCampo(inputs.paciente, errores.paciente, v => v.trim() !== "", "Nombre de paciente requerido.") && valido;
+        valido = validarCampo(inputs.servicio, errores.servicio, v => v.trim() !== "", "Selecciona servicio.") && valido;
+        valido = validarCampo(inputs.costo, errores.costo, v => !isNaN(v) && parseFloat(v) > 0, "Selecciona costo válido.") && valido;
+      }
+      valido = validarCampo(inputs.dia, errores.dia, v => v.trim() !== "", "Día requerido.") && valido;
+      valido = validarCampo(inputs.horaInicio, errores.horaInicio, v => v.trim() !== "", "Hora de inicio requerida.") && valido;
+      valido = validarCampo(inputs.horaFin, errores.horaFin, v => v.trim() !== "", "Hora de fin requerida.") && valido;
+      if (inputs.horaFin.value && inputs.horaInicio.value && inputs.horaFin.value <= inputs.horaInicio.value) {
+        errores.horaFin.textContent = "Hora de fin debe ser mayor que hora de inicio.";
+        errores.horaFin.classList.add("show");
+        inputs.horaFin.classList.add("input-error");
+        valido = false;
+      }
+      btnGuardar.disabled = !valido;
+      btnGuardar.setAttribute("aria-disabled", String(!valido));
+      return valido;
+    }
+function quitarAcentos(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+function calcularPagoEspecialista(servicio, costo, especialista) {
+  servicio = quitarAcentos(servicio.toLowerCase());
+
+      if (especialista === "Lic Cynthia" && servicio === "Terapia de Lenguaje" && costo === 120) {
+        return 90;
+      }
+      const mapa = {
+        "Psicología Infantil": costo === 150 ? 100 : 130,
+        "Psicología Adulto": 150,
+        "Medico Especialista en rehabilitación": 0,
+        "Consulta Medica": 10,
+        Audiología: 50,
+"estimulacion temprana": costo === 120 ? 70 : 50,
+        Nutrición: 150,
+        "Terapia Física": 150,
+        "Terapia Ocupacional": 50,
+        "Terapia de Lenguaje": costo === 100 ? 70 : 80,
+      };
+      return mapa[servicio] ?? costo * 0.7;
+    }
+
+    btnGuardar.addEventListener("click", () => {
+      intentoEnvio = true;  // Usuario intentó guardar
+      errores.formError.textContent = "";
+
+      if (!validarCampos()) {
+        errores.formError.textContent = "Corrige los errores antes de guardar.";
+        mostrarToast("Corrige los errores del formulario", "error");
+        return;
+      }
+
+      const especialista = normalizarNombre(modoManualEspCheck.checked ? inputs.manualEspecialista.value : inputs.especialista.value);
+      const paciente = modoManualCostosCheck.checked ? inputs.manualPaciente.value.trim() : inputs.paciente.value.trim();
+      const servicio = normalizarNombre(modoManualCostosCheck.checked ? inputs.manualServicio.value : inputs.servicio.value);
+      const costo = modoManualCostosCheck.checked ? parseFloat(inputs.manualCosto.value) : parseFloat(inputs.costo.value);
+      const comision = modoManualCostosCheck.checked
+        ? parseFloat(inputs.manualComision.value)
+        : calcularPagoEspecialista(servicio, costo, especialista);
+      const dia = inputs.dia.value;
+      const hora = inputs.horaInicio.value + " - " + inputs.horaFin.value;
+
+      registros.push({ paciente, especialista, servicio, costo, dia, hora, pagoEspecialista: comision });
+      localStorage.setItem("registros", JSON.stringify(registros));
+
+      mostrarToast("Registro guardado con éxito", "success");
+      limpiarFormulario();
+      paginaActual = Math.ceil(registros.length / filasPorPagina);
+      renderTabla();
+      renderPaginacion();
+      actualizarGanancias();
+    });
+
+    btnBorrar.addEventListener("click", () => {
+      if (confirm("¿Estás seguro de borrar todos los registros?")) {
+        papelera.push(...registros); // Guardamos todo en papelera antes
+        registros.length = 0;
+        localStorage.removeItem("registros");
+        paginaActual = 1;
+        renderTabla();
+        renderPaginacion();
+        actualizarGanancias();
+        mostrarToastConUndo("Registros borrados correctamente", () => {
+          registros.push(...papelera);
+          papelera.length = 0;
+          localStorage.setItem("registros", JSON.stringify(registros));
+          renderTabla();
+          renderPaginacion();
+          actualizarGanancias();
+        });
+      }
+    });
+
+    function mostrarToastConUndo(mensaje, undoCallback) {
+      const toast = document.getElementById("toast");
+      toast.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px;margin-right:12px;">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span>${mensaje}</span>
+        <button id="btn-undo" style="
+          margin-left: auto; 
+          background: transparent; 
+          border:none; 
+          color: #fff; 
+          font-weight: 700; 
+          font-size: 1rem; 
+          cursor: pointer;
+          padding: 0 10px;
+          border-radius: 6px;
+          transition: background-color 0.2s ease;
+        ">Deshacer</button>
+      `;
+      toast.className = "success show";
+      toast.setAttribute("aria-live", "polite");
+      clearTimeout(toast._timeoutId);
+      toast._timeoutId = setTimeout(() => {
+        toast.className = toast.className.replace("show", "");
+      }, 6000);
+
+      const btnUndo = document.getElementById("btn-undo");
+      btnUndo.addEventListener("click", () => {
+        undoCallback();
+        toast.className = toast.className.replace("show", "");
+        clearTimeout(toast._timeoutId);
+      });
+    }
+
+    btnExportar.addEventListener("click", () => {
+      if (registros.length === 0) {
+        mostrarToast("No hay registros para exportar", "warning");
+        return;
+      }
+      const wb = XLSX.utils.book_new();
+      const ws_data = [
+        ["Paciente", "Especialista", "Servicio", "Costo", "Día", "Hora", "Pago Especialista"],
+      ];
+      registros.forEach(r => {
+        ws_data.push([r.paciente, r.especialista, r.servicio, r.costo, r.dia, r.hora, r.pagoEspecialista]);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, "Registros");
+      XLSX.writeFile(wb, `registros_servicios_${new Date().toISOString().slice(0,10)}.xlsx`);
+      mostrarToast("Archivo Excel exportado", "success");
+    });
+
+    function limpiarFormulario() {
+      form.reset();
+      Object.values(errores).forEach(e => {
+        e.textContent = "";
+        e.classList.remove("show");
+      });
+      Object.values(inputs).forEach(i => {
+        i.classList.remove("input-error");
+        i.setAttribute("aria-invalid", "false");
+      });
+      toggleModoEspecialista();
+      toggleModoCostos();
+      actualizarOpcionesCosto();
+      btnGuardar.disabled = true;
+      btnGuardar.setAttribute("aria-disabled", "true");
+      intentoEnvio = false;
+      camposTocados.clear();
+    }
+
+    function mostrarToast(mensaje, tipo = "success") {
+      const toast = document.getElementById("toast");
+      const icons = {
+        success:
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+        error:
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+        warning:
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17"/></svg>`
+      };
+      toast.innerHTML = icons[tipo] + `<span>${mensaje}</span>`;
+      toast.className = tipo + " show";
+      if(tipo === "error") {
+        toast.setAttribute("aria-live", "assertive");
+      } else {
+        toast.setAttribute("aria-live", "polite");
+      }
+      clearTimeout(toast._timeoutId);
+      toast._timeoutId = setTimeout(() => {
+        toast.className = toast.className.replace("show", "");
+      }, 3500);
+    }
+
+    function renderTabla() {
+      tablaBody.innerHTML = "";
+
+      let registrosOrdenados = [...registros];
+      if (ordenActual.columna !== null) {
+        registrosOrdenados.sort((a, b) => {
+          let valA = Object.values(a)[ordenActual.columna];
+          let valB = Object.values(b)[ordenActual.columna];
+          if (typeof valA === "string") valA = valA.toLowerCase();
+          if (typeof valB === "string") valB = valB.toLowerCase();
+          if (valA < valB) return ordenActual.asc ? -1 : 1;
+          if (valA > valB) return ordenActual.asc ? 1 : -1;
+          return 0;
+        });
+      }
+
+      const start = (paginaActual - 1) * filasPorPagina;
+      const end = start + filasPorPagina;
+      const pageItems = registrosOrdenados.slice(start, end);
+
+      pageItems.forEach((r, i) => {
+        const fila = document.createElement("tr");
+        fila.setAttribute("tabindex", "0");
+
+        fila.innerHTML = `
+          <td>${r.paciente}</td>
+          <td>${r.especialista}</td>
+          <td>${r.servicio}</td>
+          <td>$${r.costo.toFixed(2)}</td>
+          <td>${r.dia}</td>
+          <td>${r.hora}</td>
+          <td>$${r.pagoEspecialista.toFixed(2)}</td>
+        `;
+
+        // Crear botón eliminar sin usar inline onclick
+        const tdAcciones = document.createElement("td");
+        const btnEliminar = document.createElement("button");
+        btnEliminar.className = "btn-eliminar";
+        btnEliminar.setAttribute("aria-label", `Eliminar registro de ${r.paciente}`);
+        btnEliminar.textContent = "Eliminar";
+
+        btnEliminar.addEventListener("click", () => {
+          eliminarRegistro(start + i);
+        });
+
+        tdAcciones.appendChild(btnEliminar);
+        fila.appendChild(tdAcciones);
+
+        tablaBody.appendChild(fila);
+      });
+    }
+
+    function renderPaginacion() {
+      paginacionCont.innerHTML = "";
+      const totalPaginas = Math.ceil(registros.length / filasPorPagina);
+      if (totalPaginas <= 1) return;
+      for(let i=1; i<=totalPaginas; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.className = (i === paginaActual) ? "active" : "";
+        btn.setAttribute("aria-current", i === paginaActual ? "page" : "false");
+        btn.addEventListener("click", () => {
+          paginaActual = i;
+          renderTabla();
+          renderPaginacion();
+        });
+        paginacionCont.appendChild(btn);
+      }
+    }
+
+    function eliminarRegistro(indice) {
+      if (confirm("¿Estás seguro que deseas eliminar este registro?")) {
+        const eliminado = registros.splice(indice, 1)[0];
+        papelera.push(eliminado);
+        localStorage.setItem("registros", JSON.stringify(registros));
+        if(paginaActual > Math.ceil(registros.length / filasPorPagina)) {
+          paginaActual = Math.max(1, paginaActual - 1);
+        }
+        renderTabla();
+        renderPaginacion();
+        actualizarGanancias();
+        mostrarToastConUndo("Registro eliminado", () => {
+          registros.push(eliminado);
+          papelera.pop();
+          localStorage.setItem("registros", JSON.stringify(registros));
+          renderTabla();
+          renderPaginacion();
+          actualizarGanancias();
+        });
+      }
+    }
+
+    const tablaGananciasBody = document.querySelector("#tabla-ganancias tbody");
+    const tablaServiciosBody = document.querySelector("#tabla-servicios tbody");
+    const gananciaOficinaP = document.getElementById("ganancia-oficina");
+
+    function actualizarGanancias() {
+      tablaGananciasBody.innerHTML = "";
+      tablaServiciosBody.innerHTML = "";
+      let totalOficina = 0;
+      const pagosPorEspecialista = {};
+      const ingresosPorServicio = {};
+      const especialistasRehab = new Set();
+
+      registros.forEach((r) => {
+        if (r.servicio === "Medico Especialista en rehabilitación") {
+          especialistasRehab.add(normalizarNombre(r.especialista));
+          const servNormalizado = normalizarNombre(r.servicio);
+        ingresosPorServicio[servNormalizado] = (ingresosPorServicio[servNormalizado] || 0) + r.costo;
+          totalOficina += r.costo;
+        } else {
+          const espNormalizado = normalizarNombre(r.especialista);
+        pagosPorEspecialista[espNormalizado] = (pagosPorEspecialista[espNormalizado] || 0) + r.pagoEspecialista;
+          const servNormalizado = normalizarNombre(r.servicio);
+        ingresosPorServicio[servNormalizado] = (ingresosPorServicio[servNormalizado] || 0) + r.costo;
+          totalOficina += r.costo - r.pagoEspecialista;
+        }
+      });
+
+      especialistasRehab.forEach((esp) => {
+        pagosPorEspecialista[esp] = 1800;
+        totalOficina -= 1800;
+      });
+
+      Object.entries(pagosPorEspecialista).forEach(([esp, total]) => {
+        const fila = tablaGananciasBody.insertRow();
+        fila.innerHTML = `<td>${esp}</td><td>$${total.toFixed(2)}</td>`;
+      });
+
+      Object.entries(ingresosPorServicio).forEach(([serv, total]) => {
+        const fila = tablaServiciosBody.insertRow();
+        fila.innerHTML = `<td>${serv}</td><td>$${total.toFixed(2)}</td>`;
+      });
+
+      gananciaOficinaP.textContent = `$${totalOficina.toFixed(2)}`;
+    }
+
+    window.onload = () => {
+      toggleModoEspecialista();
+      toggleModoCostos();
+      actualizarOpcionesCosto();
+      renderTabla();
+      renderPaginacion();
+      actualizarGanancias();
+      validarCampos();
+    };
+
+    // DARK MODE TOGGLE
+    const toggleDarkBtn = document.getElementById("toggle-darkmode");
+    toggleDarkBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const isDark = document.body.classList.contains("dark");
+      toggleDarkBtn.setAttribute("aria-pressed", isDark);
+      toggleDarkBtn.textContent = isDark ? "Modo Claro" : "Modo Oscuro";
+    });
+
+    // VALIDACION EN TIEMPO REAL Y DIFERIDA
+    Object.values(inputs).forEach(input => {
+      input.addEventListener("input", () => {
+        camposTocados.add(input.id);
+        validarCampos();
+      });
+    });
+    modoManualEspCheck.addEventListener("input", () => {
+      camposTocados.add(modoManualEspCheck.id);
+      validarCampos();
+    });
+    modoManualCostosCheck.addEventListener("input", () => {
+      camposTocados.add(modoManualCostosCheck.id);
+      validarCampos();
+    });
+
+  </script>
+</body>
+</html>
